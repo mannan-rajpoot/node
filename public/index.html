@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Pizza Order</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f8f8f8; }
+  h1 { text-align: center; }
+  .pizza { background: white; padding: 15px; margin: 10px auto; max-width: 400px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .pizza button { background: #e63946; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+  #orders { margin-top: 30px; background: white; padding: 15px; max-width: 500px; margin-left: auto; margin-right: auto; border-radius: 8px; }
+</style>
+</head>
+<body>
+<h1>🍕 Pizza Shop</h1>
+<div class="pizza">
+  <h3>Margherita - $10</h3>
+  <button onclick="orderPizza('Margherita')">Order</button>
+</div>
+<div class="pizza">
+  <h3>Pepperoni - $12</h3>
+  <button onclick="orderPizza('Pepperoni')">Order</button>
+</div>
+<div class="pizza">
+  <h3>Veggie - $9</h3>
+  <button onclick="orderPizza('Veggie')">Order</button>
+</div>
+
+<div id="orders">
+  <h3>Orders:</h3>
+  <ul id="orderList"></ul>
+</div>
+
+<script>
+function orderPizza(type) {
+  fetch('/order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pizza: type })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert('Order placed: ' + data.pizza);
+    loadOrders();
+  });
+}
+
+function loadOrders() {
+  fetch('/orders')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('orderList').innerHTML =
+        data.map(o => `<li>${o}</li>`).join('');
+    });
+}
+loadOrders();
+</script>
+</body>
+</html>
