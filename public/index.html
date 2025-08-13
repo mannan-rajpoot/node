@@ -8,11 +8,16 @@
   h1 { text-align: center; }
   .pizza { background: white; padding: 15px; margin: 10px auto; max-width: 400px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
   .pizza button { background: #e63946; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
-  #orders { margin-top: 30px; background: white; padding: 15px; max-width: 500px; margin-left: auto; margin-right: auto; border-radius: 8px; }
+  #orders, #adminLogin { margin-top: 30px; background: white; padding: 15px; max-width: 500px; margin-left: auto; margin-right: auto; border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+  th { background: #e63946; color: white; }
 </style>
 </head>
 <body>
 <h1>🍕 Pizza Shop</h1>
+
+<!-- Customer Order Section -->
 <div class="pizza">
   <h3>Margherita - $10</h3>
   <button onclick="orderPizza('Margherita')">Order</button>
@@ -26,9 +31,25 @@
   <button onclick="orderPizza('Veggie')">Order</button>
 </div>
 
-<div id="orders">
-  <h3>Orders:</h3>
-  <ul id="orderList"></ul>
+<!-- Admin Login -->
+<div id="adminLogin">
+  <h3>Admin Login</h3>
+  <input type="password" id="adminPass" placeholder="Enter password">
+  <button onclick="loginAdmin()">Login</button>
+</div>
+
+<!-- Admin Orders Table -->
+<div id="orders" style="display:none;">
+  <h3>All Orders</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Pizza</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody id="orderTable"></tbody>
+  </table>
 </div>
 
 <script>
@@ -41,19 +62,28 @@ function orderPizza(type) {
   .then(res => res.json())
   .then(data => {
     alert('Order placed: ' + data.pizza);
-    loadOrders();
   });
 }
 
-function loadOrders() {
-  fetch('/orders')
+function loginAdmin() {
+  const pass = document.getElementById('adminPass').value;
+  fetch('/admin-orders?pass=' + encodeURIComponent(pass))
     .then(res => res.json())
     .then(data => {
-      document.getElementById('orderList').innerHTML =
-        data.map(o => `<li>${o}</li>`).join('');
+      if (data.error) {
+        alert('Wrong password!');
+        return;
+      }
+      document.getElementById('adminLogin').style.display = 'none';
+      document.getElementById('orders').style.display = 'block';
+      const table = document.getElementById('orderTable');
+      table.innerHTML = '';
+      data.forEach(o => {
+        table.innerHTML += `<tr><td>${o.pizza}</td><td>${o.time}</td></tr>`;
+      });
     });
 }
-loadOrders();
 </script>
 </body>
 </html>
+
